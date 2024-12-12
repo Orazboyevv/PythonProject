@@ -5,8 +5,8 @@ import logging
 import os
 
 # Bot tokeni va kanal ID
-TOKEN = "7261655371:AAFjJ_lArVog525v4mV1whCXMzFr7k5GLlg"
-CHANNEL_ID = "-1001823396741"
+TOKEN = os.getenv("7261655371:AAHjXuUYRyTziGa5Mc_yJvxj2qGmr3tHMeQ")
+CHANNEL_ID = os.getenv("CHANNEL_ID", "-1002435258354")
 
 # Loglarni sozlash
 logging.basicConfig(level=logging.INFO)
@@ -87,13 +87,21 @@ async def process_vote(callback_query: types.CallbackQuery):
         "Boyovut tumanidagi ijtimoiy soha tashkilotlaridan qaysi biri 2024-yil davomida namunali tarzda faoliyat olib bordi deb hisoblaysiz?\n\n"
         "✅ So‘rovnomada ishtirok eting, o‘zingiz munosib deb bilgan tashkilotga ovoz bering!"
     )
-    await bot.edit_message_text(
-        chat_id=callback_query.message.chat.id,
-        message_id=callback_query.message.message_id,
-        text=updated_text,
-        reply_markup=get_poll_keyboard()
-    )
-    await bot.answer_callback_query(callback_query.id, text="Sizning ovozingiz qabul qilindi!")
+    try:
+        await bot.edit_message_text(
+            chat_id=callback_query.message.chat.id,
+            message_id=callback_query.message.message_id,
+            text=updated_text,
+            reply_markup=get_poll_keyboard()
+        )
+        await bot.answer_callback_query(callback_query.id, text="Sizning ovozingiz qabul qilindi!")
+    except Exception as e:
+        logging.error(f"Xabarni yangilashda xatolik yuz berdi: {e}")
+        await bot.answer_callback_query(
+            callback_query.id,
+            text="Xabarni yangilashda xatolik yuz berdi.",
+            show_alert=True
+        )
 
 # Webhook serverini sozlash
 async def handle_webhook(request):
