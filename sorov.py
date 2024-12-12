@@ -96,6 +96,11 @@ async def process_vote(callback_query: types.CallbackQuery):
     await bot.answer_callback_query(callback_query.id, text="Sizning ovozingiz qabul qilindi!")
 
 # Webhook serverini sozlash
+async def handle_webhook(request):
+    update = await request.json()
+    await dp.process_update(types.Update(**update))
+    return web.Response()
+
 async def on_startup(app):
     webhook_url = f"{os.getenv('RENDER_EXTERNAL_URL')}/webhook"
     await bot.set_webhook(webhook_url)
@@ -103,12 +108,11 @@ async def on_startup(app):
 async def on_shutdown(app):
     await bot.delete_webhook()
 
+# Aiohttp serverni sozlash
 app = web.Application()
+app.router.add_post('/webhook', handle_webhook)
 app.on_startup.append(on_startup)
 app.on_shutdown.append(on_shutdown)
 
-# Aiohttp marshrutni sozlash
-app.router.add_post('/webhook', dp.start_webhook)
-
 if __name__ == "__main__":
-    web.run_app(app, port=int(os.environ.get("PORT", 5000)))
+    web.run_app(app, port=int(os.getenv("PORT", 5000)))
