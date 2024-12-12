@@ -5,7 +5,7 @@ import logging
 import os
 
 # Bot tokeni va kanal ID
-TOKEN = os.getenv("7261655371:AAHjXuUYRyTziGa5Mc_yJvxj2qGmr3tHMeQ")
+TOKEN = os.getenv("7261655371:AAGIvAc_6Q3i1obcF_2SHKocUx2G7Ae_A4M")
 CHANNEL_ID = os.getenv("CHANNEL_ID", "-1002435258354")
 
 # Loglarni sozlash
