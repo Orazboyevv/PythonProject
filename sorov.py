@@ -1,7 +1,7 @@
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from aiogram.utils.executor import start_webhook
 import logging
+from aiohttp import web
 import os
 
 # Bot tokeni va kanal ID
@@ -14,12 +14,6 @@ logging.basicConfig(level=logging.INFO)
 # Bot va dispatcherni ishga tushirish
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
-
-# Webhook sozlamalari
-WEBHOOK_PATH = f"/webhook/{TOKEN}"
-WEBHOOK_URL = f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME')}{WEBHOOK_PATH}"
-WEBAPP_HOST = '0.0.0.0'
-WEBAPP_PORT = int(os.getenv('PORT', 8000))
 
 # So'rovnoma ma'lumotlari
 poll_data = {
@@ -113,21 +107,24 @@ async def get_photo_id(message: types.Message):
     photo_id = message.photo[-1].file_id  # Rasmning eng katta hajmli versiyasini tanlash
     await message.answer(f"Rasmning file_id: {photo_id}")
 
-# Webhookni sozlash
-async def on_startup(dp):
-    logging.info("Webhookni sozlash...")
-    await bot.set_webhook(WEBHOOK_URL)
+# Webhook serverini sozlash
+async def handle_webhook(request):
+    update = await request.json()
+    await dp.process_update(types.Update(**update))
+    return web.Response()
 
-async def on_shutdown(dp):
-    logging.info("Webhookni tozalash...")
+async def on_startup(app):
+    webhook_url = f"{os.getenv('RENDER_EXTERNAL_URL')}/webhook"
+    await bot.set_webhook(webhook_url)
+
+async def on_shutdown(app):
     await bot.delete_webhook()
 
+# Aiohttp serverni sozlash
+app = web.Application()
+app.router.add_post('/webhook', handle_webhook)
+app.on_startup.append(on_startup)
+app.on_shutdown.append(on_shutdown)
+
 if __name__ == "__main__":
-    start_webhook(
-        dispatcher=dp,
-        webhook_path=WEBHOOK_PATH,
-        on_startup=on_startup,
-        on_shutdown=on_shutdown,
-        host=WEBAPP_HOST,
-        port=WEBAPP_PORT
-    )
+    web.run_app(app, port=int(os.getenv("PORT", 19099)))
