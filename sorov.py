@@ -1,7 +1,8 @@
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from aiogram.utils import executor
+from aiogram.utils.executor import start_webhook
 import logging
+import os
 
 # Bot tokeni va kanal ID
 TOKEN = "7261655371:AAGIvAc_6Q3i1obcF_2SHKocUx2G7Ae_A4M"
@@ -13,6 +14,12 @@ logging.basicConfig(level=logging.INFO)
 # Bot va dispatcherni ishga tushirish
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
+
+# Webhook sozlamalari
+WEBHOOK_PATH = f"/webhook/{TOKEN}"
+WEBHOOK_URL = f"https://{os.getenv('RENDER_EXTERNAL_HOSTNAME')}{WEBHOOK_PATH}"
+WEBAPP_HOST = '0.0.0.0'
+WEBAPP_PORT = int(os.getenv('PORT', 8000))
 
 # So'rovnoma ma'lumotlari
 poll_data = {
@@ -104,8 +111,21 @@ async def process_vote(callback_query: types.CallbackQuery):
 async def get_photo_id(message: types.Message):
     # Rasmning file_id sini olish
     photo_id = message.photo[-1].file_id  # Rasmning eng katta hajmli versiyasini tanlash
-    await message.answer(f"Rasmning file_id: {AgACAgIAAxkBAAN5Z1rGJ4GAXtY-Yrj96ElHns5D8lYAAsvnMRuwN9lKfO8ag0MbxdkBAAMCAAN4AAM2BA}")
+    await message.answer(f"Rasmning file_id: {photo_id}")
 
-# Botni ishga tushirish
+# Webhookni sozlash
+async def on_startup(dp):
+    await bot.set_webhook(WEBHOOK_URL)
+
+async def on_shutdown(dp):
+    await bot.delete_webhook()
+
 if __name__ == "__main__":
-    executor.start_polling(dp, skip_updates=True)
+    start_webhook(
+        dispatcher=dp,
+        webhook_path=WEBHOOK_PATH,
+        on_startup=on_startup,
+        on_shutdown=on_shutdown,
+        host=WEBAPP_HOST,
+        port=WEBAPP_PORT
+    )
