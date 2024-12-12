@@ -1,7 +1,8 @@
 from aiogram import Bot, Dispatcher, types
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from aiogram.utils import executor
+from aiohttp import web
 import logging
+import os
 
 # Bot tokeni va kanal ID
 TOKEN = "7261655371:AAFjJ_lArVog525v4mV1whCXMzFr7k5GLlg"
@@ -10,7 +11,7 @@ CHANNEL_ID = "-1001823396741"
 # Loglarni sozlash
 logging.basicConfig(level=logging.INFO)
 
-# Bot va dispatcherni ishga tushirish
+# Bot va dispatcher
 bot = Bot(token=TOKEN)
 dp = Dispatcher(bot)
 
@@ -59,7 +60,6 @@ async def start_poll(message: types.Message):
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith("vote_"))
 async def process_vote(callback_query: types.CallbackQuery):
     user_id = callback_query.from_user.id
-
     # Kanalga a'zo ekanligini tekshirish
     if not await is_subscribed(user_id):
         await bot.answer_callback_query(
@@ -68,7 +68,6 @@ async def process_vote(callback_query: types.CallbackQuery):
             show_alert=True
         )
         return
-
     # Foydalanuvchining ovoz berganligini tekshirish
     if user_id in voters:
         await bot.answer_callback_query(
@@ -77,14 +76,11 @@ async def process_vote(callback_query: types.CallbackQuery):
             show_alert=True
         )
         return
-
     # Foydalanuvchining ovozini qayd qilish
     voters.add(user_id)
-
     # Ovoz hisoblash
     option_id = int(callback_query.data.split("_")[1])
     poll_data[option_id]["votes"] += 1
-
     # So‘rovnomani yangilash
     updated_text = (
         "Hurmatli yurtdoshlar,\n"
@@ -99,6 +95,20 @@ async def process_vote(callback_query: types.CallbackQuery):
     )
     await bot.answer_callback_query(callback_query.id, text="Sizning ovozingiz qabul qilindi!")
 
-# Botni ishga tushirish
+# Webhook serverini sozlash
+async def on_startup(app):
+    webhook_url = f"{os.getenv('RENDER_EXTERNAL_URL')}/webhook"
+    await bot.set_webhook(webhook_url)
+
+async def on_shutdown(app):
+    await bot.delete_webhook()
+
+app = web.Application()
+app.on_startup.append(on_startup)
+app.on_shutdown.append(on_shutdown)
+
+# Aiohttp marshrutni sozlash
+app.router.add_post('/webhook', dp.start_webhook)
+
 if __name__ == "__main__":
-    executor.start_polling(dp, skip_updates=True)
+    web.run_app(app, port=int(os.environ.get("PORT", 5000)))
