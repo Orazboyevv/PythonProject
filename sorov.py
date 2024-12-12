@@ -104,7 +104,7 @@ async def process_vote(callback_query: types.CallbackQuery):
 async def get_photo_id(message: types.Message):
     # Rasmning file_id sini olish
     photo_id = message.photo[-1].file_id  # Rasmning eng katta hajmli versiyasini tanlash
-    await message.answer(f"Rasmning file_id: {photo_id}")
+    await message.answer(f"Rasmning file_id: {AgACAgIAAxkBAAN5Z1rGJ4GAXtY-Yrj96ElHns5D8lYAAsvnMRuwN9lKfO8ag0MbxdkBAAMCAAN4AAM2BA}")
 
 # Botni ishga tushirish
 if __name__ == "__main__":
