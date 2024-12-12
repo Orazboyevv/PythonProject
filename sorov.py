@@ -5,7 +5,7 @@ import logging
 import os
 
 # Bot tokeni va kanal ID
-TOKEN = "7261655371:AAGIvAc_6Q3i1obcF_2SHKocUx2G7Ae_A4M"
+TOKEN = "7261655371:AAG7N_5iGguEI-mQ7tmhAhs5MUb6gktkgY8"
 CHANNEL_ID = "-1001823396741"
 
 # Loglarni sozlash
@@ -115,9 +115,11 @@ async def get_photo_id(message: types.Message):
 
 # Webhookni sozlash
 async def on_startup(dp):
+    logging.info("Webhookni sozlash...")
     await bot.set_webhook(WEBHOOK_URL)
 
 async def on_shutdown(dp):
+    logging.info("Webhookni tozalash...")
     await bot.delete_webhook()
 
 if __name__ == "__main__":
