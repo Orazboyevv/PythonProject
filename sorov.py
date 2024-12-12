@@ -99,6 +99,13 @@ async def process_vote(callback_query: types.CallbackQuery):
     )
     await bot.answer_callback_query(callback_query.id, text="Sizning ovozingiz qabul qilindi!")
 
+# Rasmning file_id sini olish
+@dp.message_handler(content_types=['photo'])
+async def get_photo_id(message: types.Message):
+    # Rasmning file_id sini olish
+    photo_id = message.photo[-1].file_id  # Rasmning eng katta hajmli versiyasini tanlash
+    await message.answer(f"Rasmning file_id: {photo_id}")
+
 # Botni ishga tushirish
 if __name__ == "__main__":
     executor.start_polling(dp, skip_updates=True)
