@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO)
 
 # Bot va dispatcherni ishga tushirish
 bot = Bot(token=TOKEN)
-Bot.set_current(bot)  # Botni kontekstda sozlash
+Bot.set_current(bot)  # Bot instansiyasini kontekstga qo'shish
 dp = Dispatcher(bot)
 
 # So'rovnoma ma'lumotlari
@@ -26,9 +26,6 @@ poll_data = {
 
 # Ovoz bergan foydalanuvchilarni saqlash
 voters = set()
-
-# So'rovnoma faqat bir marta yuborilishini ta'minlash
-poll_posted = False
 
 # Inline tugmalarni yaratish
 def get_poll_keyboard():
@@ -49,12 +46,6 @@ async def is_subscribed(user_id):
 # So‘rovnomani kanalga post qilish
 @dp.message_handler(commands=["start_poll"])
 async def start_poll(message: types.Message):
-    global poll_posted
-    if poll_posted:  # Agar so'rovnoma yuborilgan bo'lsa, uni qayta yubormaslik
-        await message.answer("So'rovnoma allaqachon yuborilgan.")
-        return
-
-    poll_posted = True  # So'rovnoma yuborilganligini belgilash
     poll_text = (
         "Hurmatli yurtdoshlar,\n"
         "Boyovut tumanidagi ijtimoiy soha tashkilotlaridan qaysi biri 2024-yil davomida namunali tarzda faoliyat olib bordi deb hisoblaysiz?\n\n"
