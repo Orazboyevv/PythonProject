@@ -5,7 +5,7 @@ from aiohttp import web
 import os
 
 # Bot tokeni va kanal ID
-TOKEN = "7261655371:AAG7N_5iGguEI-mQ7tmhAhs5MUb6gktkgY8"
+TOKEN = "7261655371:AAHiDaWP3mj1l38j2jGPgIPLDFdOGinlfN8"
 CHANNEL_ID = "-1001823396741"
 
 # Loglarni sozlash
@@ -13,6 +13,7 @@ logging.basicConfig(level=logging.INFO)
 
 # Bot va dispatcherni ishga tushirish
 bot = Bot(token=TOKEN)
+Bot.set_current(bot)  # Botni kontekstda sozlash
 dp = Dispatcher(bot)
 
 # So'rovnoma ma'lumotlari
